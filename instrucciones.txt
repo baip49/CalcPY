@@ -1,0 +1,3 @@
+1.- Descargar ña versión más reciente de PLY 
+2.- Instalar la versión más reciente de Python
+3.- Ejecutar en cmd "pip install ply"
