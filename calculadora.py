@@ -355,7 +355,7 @@ button_config['font'] = ('Segoe UI Emoji', 16, 'bold')
 camera_button = Button(sixth_row, text='📷', **button_config)
 camera_button.pack(side='left', expand=True, fill='both')
 
-micro_button = Button(sixth_row, text='🎙️', **button_config)
+micro_button = Button(sixth_row, text='🎙️', **button_config, command=lambda: [micro_button.config(bg="green"), mic()])
 micro_button.pack(side='left', expand=True, fill='both')
 
 zero_button = Button(sixth_row, text='0', **button_config, command=lambda: update_input_label('0'))
@@ -373,5 +373,69 @@ equal_button = Button(sixth_row, text='=',
                         relief='flat',
                         width=11, command=evaluate_expression)
 equal_button.pack(side='left', expand=True, fill='both')
+
+
+
+# Voz a texto
+import azure.cognitiveservices.speech as speechsdk
+
+# Comandos de voz
+def transformar_comando(texto):
+    comandos = {
+        "sin": ["sin", "sin de", "seno", "seno de"],
+        "cos": ["cos", "cos de", "coseno", "coseno de"],
+        "tan": ["tan", "tan de", "tangente", "tangente de"],
+        "log": ["log", "logaritmo", "logaritmo de"],
+        "ln": ["ln", "logaritmo natural"],
+        "pi": ["pi"],
+        "(": ["paréntesis izquierdo", "abrir paréntesis", "abre paréntesis"],
+        ")": ["paréntesis derecho", "cierra paréntesis", "cerrar paréntesis"],
+        "^": ["potencia", "a la", "elevado", "elevado a"],
+        "/": ["entre", "dividir", "división", "sobre"],
+        "e": ["e", "euler"],
+        "sqrt": ["sqrt", "raíz cuadrada", "raíz"],
+        "7": ["siete", "número siete", "número 7", "7"],
+        "8": ["ocho", "número ocho", "número 8", "8"],
+        "9": ["nueve", "número nueve", "número 9", "9"],
+        "x": ["por", "multiplicar", "multiplicación", "multiplicado", "multiplicado por"],
+        "4": ["cuatro", "número cuatro", "número 4", "4"],
+        "5": ["cinco", "número cinco", "número 5", "5"],
+        "6": ["seis", "número seis", "número 6", "6"],
+        "-": ["menos", "resta", "restar", "resta a", "restar a"],
+        "1": ["uno", "número uno", "número 1", "1"],
+        "2": ["dos", "número dos", "número 2", "2"],
+        "3": ["tres", "número tres", "número 3", "3"],
+        "+": ["mas", "suma", "sumar", "sumar a", "suma a"],
+        "0": ["cero", "número cero", "número 0", "0"],
+        ".": ["punto", "punto decimal"],
+    }
+    for comando, palabras in comandos.items():
+        for palabra in palabras:
+            if palabra in texto:
+                texto = texto.replace(palabra, comando)
+    return texto
+
+# Función para reconocer comandos de voz
+def mic():
+    speech_config = speechsdk.SpeechConfig()
+    speech_config.speech_recognition_language = "es-MX"
+    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config)
+
+    print("Escuchando...")
+    speech_recognition_result = speech_recognizer.recognize_once_async().get()
+    texto_reconocido = speech_recognition_result.text.rstrip('.')
+    print(texto_reconocido)
+    
+    comando = transformar_comando(texto_reconocido)
+
+    if "CE" in comando or "limpiar" in comando or "borrar todo" in comando or "borra todo" in comando:
+        clear_input_label()
+    elif "DEL" in comando or "borra" in comando or "borrar" in comando or "borra uno" in comando or "borrar uno" in comando:
+        current_text = input_label.cget("text")
+        input_label.config(text=current_text[:-1])
+    elif "Resultado" in comando or "resultado" in comando or "igual" in comando or "igual a" in comando:
+        evaluate_expression()
+    else:
+        input_label.config(text=comando)
 
 app.mainloop()
