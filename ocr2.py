@@ -107,3 +107,5 @@ def camera():
     # Liberar la cámara cuando se cierre la ventana
     cap.release()
     cv2.destroyAllWindows()
+
+# camera()

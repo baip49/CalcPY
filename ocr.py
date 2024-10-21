@@ -70,3 +70,5 @@ def cam():
     video.release()
     cv2.destroyAllWindows()
     return expresion
+
+# cam()
