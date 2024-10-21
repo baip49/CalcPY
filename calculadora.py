@@ -1,9 +1,16 @@
+from dotenv import load_dotenv
+import os
 from tkinter import *
 from tkinter import messagebox
+from tkinter import Tk, Button, Label, StringVar
 import tkinter as tk
 import ply.lex as lex
 import ply.yacc as yacc
 import math
+# from ocr2 import camera
+from ocr import cam as camera
+
+load_dotenv() # Cargar variables de entorno
 
 # Tokens
 tokens = (
@@ -352,7 +359,7 @@ sixth_row.pack()
 button_config['width'] = 7
 button_config['font'] = ('Segoe UI Emoji', 16, 'bold')
 
-camera_button = Button(sixth_row, text='📷', **button_config)
+camera_button = Button(sixth_row, text='📷', **button_config, command=lambda: [camera_button.config(bg="green"), cam()])
 camera_button.pack(side='left', expand=True, fill='both')
 
 micro_button = Button(sixth_row, text='🎙️', **button_config, command=lambda: [micro_button.config(bg="green"), mic()])
@@ -381,6 +388,7 @@ import azure.cognitiveservices.speech as speechsdk
 
 # Comandos de voz
 def transformar_comando(texto):
+    global comandos
     comandos = {
         "sin": ["sin", "sin de", "seno", "seno de"],
         "cos": ["cos", "cos de", "coseno", "coseno de"],
@@ -417,7 +425,7 @@ def transformar_comando(texto):
 
 # Función para reconocer comandos de voz
 def mic():
-    speech_config = speechsdk.SpeechConfig()
+    speech_config = speechsdk.SpeechConfig(subscription=os.environ.get('SPEECH_KEY'), region=os.environ.get('SPEECH_REGION'))
     speech_config.speech_recognition_language = "es-MX"
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config)
 
@@ -437,5 +445,12 @@ def mic():
         evaluate_expression()
     else:
         input_label.config(text=comando)
+
+
+# Función para capturar una imagen y reconocer el texto
+def cam():
+    texto_reconocido = camera()
+    if texto_reconocido:
+        input_label.config(text=texto_reconocido)
 
 app.mainloop()
