@@ -1,6 +1,8 @@
 from dotenv import load_dotenv
 import azure.cognitiveservices.speech as speechsdk
 import os
+from dotenv import load_dotenv
+import os
 from tkinter import *
 from tkinter import messagebox
 from tkinter import Tk, Button, Label, StringVar
@@ -390,12 +392,12 @@ equal_button.pack(side='left', expand=True, fill='both')
 def transformar_comando(texto):
     global comandos
     comandos = {
-        "sin": ["sin", "seno de"],
-        "cos": ["cos", "coseno", "coseno de"],
-        "tan": ["tan", "tangente", "tangente de"],
-        "log": ["log", "logaritmo de"],
-        "ln": ["ln", "logaritmo natural", "Logaritmo natural de"],
-        "π": ["pi", "Pi"],
+        "sin": ["sin", "sin de", "seno", "seno de"],
+        "cos": ["cos", "cos de", "coseno", "coseno de"],
+        "tan": ["tan", "tan de", "tangente", "tangente de"],
+        "log": ["log", "logaritmo", "logaritmo de"],
+        "ln": ["ln", "logaritmo natural"],
+        "pi": ["pi"],
         "(": ["paréntesis izquierdo", "abrir paréntesis", "abre paréntesis"],
         ")": ["paréntesis derecho", "cierra paréntesis", "cerrar paréntesis"],
         "^": ["potencia", "a la", "elevado a"],
@@ -405,7 +407,7 @@ def transformar_comando(texto):
         "7": ["siete", "número siete", "número 7", "7"],
         "8": ["ocho", "número ocho", "número 8", "8"],
         "9": ["nueve", "número nueve", "número 9", "9"],
-        "*": ["por", "multiplicar", "multiplicación"],
+        "x": ["por", "multiplicar", "multiplicación", "multiplicado", "multiplicado por"],
         "4": ["cuatro", "número cuatro", "número 4", "4"],
         "5": ["cinco", "número cinco", "número 5", "5"],
         "6": ["seis", "número seis", "número 6", "6"],
