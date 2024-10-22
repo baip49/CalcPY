@@ -1,9 +1,17 @@
+from dotenv import load_dotenv
+import azure.cognitiveservices.speech as speechsdk
+import os
 from tkinter import *
 from tkinter import messagebox
+from tkinter import Tk, Button, Label, StringVar
 import tkinter as tk
 import ply.lex as lex
 import ply.yacc as yacc
 import math
+# from ocr2 import camera
+from ocr import cam as camera
+
+load_dotenv() # Cargar variables de entorno
 
 # Tokens
 tokens = (
@@ -120,14 +128,14 @@ def p_expression_ln(p):
     p[0] = math.log(p[2])
 
 def p_error(p):
-    print("Errro de sintaxis: '%s'" % p.value)
+    print("Error de sintaxis: '%s'" % p.value)
     input_label.config(text="")
 
 parser = yacc.yacc()
 
 # Función para evaluar la expresión
 def evaluate_expression():
-    expression = input_label.cget("text")
+    expression = input_label.cget("text").replace('−', '-')
     try:
         result = parser.parse(expression)
         result_label.config(text=str(result))
@@ -352,7 +360,7 @@ sixth_row.pack()
 button_config['width'] = 7
 button_config['font'] = ('Segoe UI Emoji', 16, 'bold')
 
-camera_button = Button(sixth_row, text='📷', **button_config)
+camera_button = Button(sixth_row, text='📷', **button_config, command=lambda: [camera_button.config(bg="green"), cam()])
 camera_button.pack(side='left', expand=True, fill='both')
 
 micro_button = Button(sixth_row, text='🎙️', **button_config, command=lambda: [micro_button.config(bg="green"), mic()])
@@ -377,27 +385,27 @@ equal_button.pack(side='left', expand=True, fill='both')
 
 
 # Voz a texto
-import azure.cognitiveservices.speech as speechsdk
 
 # Comandos de voz
 def transformar_comando(texto):
+    global comandos
     comandos = {
-        "sin": ["sin", "sin de", "seno", "seno de"],
-        "cos": ["cos", "cos de", "coseno", "coseno de"],
-        "tan": ["tan", "tan de", "tangente", "tangente de"],
-        "log": ["log", "logaritmo", "logaritmo de"],
-        "ln": ["ln", "logaritmo natural"],
-        "pi": ["pi"],
+        "sin": ["sin", "seno de"],
+        "cos": ["cos", "coseno", "coseno de"],
+        "tan": ["tan", "tangente", "tangente de"],
+        "log": ["log", "logaritmo de"],
+        "ln": ["ln", "logaritmo natural", "Logaritmo natural de"],
+        "π": ["pi", "Pi"],
         "(": ["paréntesis izquierdo", "abrir paréntesis", "abre paréntesis"],
         ")": ["paréntesis derecho", "cierra paréntesis", "cerrar paréntesis"],
-        "^": ["potencia", "a la", "elevado", "elevado a"],
+        "^": ["potencia", "a la", "elevado a"],
         "/": ["entre", "dividir", "división", "sobre"],
-        "e": ["e", "euler"],
-        "sqrt": ["sqrt", "raíz cuadrada", "raíz"],
+        "e": ["euler"],
+        "sqrt": ["sqrt", "raíz cuadrada", "raíz", "raíz de", "raíz cuadrada de"],
         "7": ["siete", "número siete", "número 7", "7"],
         "8": ["ocho", "número ocho", "número 8", "8"],
         "9": ["nueve", "número nueve", "número 9", "9"],
-        "x": ["por", "multiplicar", "multiplicación", "multiplicado", "multiplicado por"],
+        "*": ["por", "multiplicar", "multiplicación"],
         "4": ["cuatro", "número cuatro", "número 4", "4"],
         "5": ["cinco", "número cinco", "número 5", "5"],
         "6": ["seis", "número seis", "número 6", "6"],
@@ -405,9 +413,9 @@ def transformar_comando(texto):
         "1": ["uno", "número uno", "número 1", "1"],
         "2": ["dos", "número dos", "número 2", "2"],
         "3": ["tres", "número tres", "número 3", "3"],
-        "+": ["mas", "suma", "sumar", "sumar a", "suma a"],
+        "+": ["mas", "más" "suma", "sumar", "sumar a", "suma a"],
         "0": ["cero", "número cero", "número 0", "0"],
-        ".": ["punto", "punto decimal"],
+        ".": ["punto", "punto decimal"]
     }
     for comando, palabras in comandos.items():
         for palabra in palabras:
@@ -417,13 +425,13 @@ def transformar_comando(texto):
 
 # Función para reconocer comandos de voz
 def mic():
-    speech_config = speechsdk.SpeechConfig()
+    speech_config = speechsdk.SpeechConfig(subscription=os.environ.get('SPEECH_KEY'), region=os.environ.get('SPEECH_REGION'))
     speech_config.speech_recognition_language = "es-MX"
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config)
 
     print("Escuchando...")
     speech_recognition_result = speech_recognizer.recognize_once_async().get()
-    texto_reconocido = speech_recognition_result.text.rstrip('.')
+    texto_reconocido = speech_recognition_result.text.replace(',', '').rstrip('.').lower()
     print(texto_reconocido)
     
     comando = transformar_comando(texto_reconocido)
@@ -437,5 +445,12 @@ def mic():
         evaluate_expression()
     else:
         input_label.config(text=comando)
+
+
+# Función para capturar una imagen y reconocer el texto
+def cam():
+    texto_reconocido = camera()
+    if texto_reconocido:
+        input_label.config(text=texto_reconocido)
 
 app.mainloop()
